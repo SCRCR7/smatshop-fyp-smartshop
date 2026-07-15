@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
@@ -47,20 +48,25 @@ app.get('/api/test-gemini', async (req, res) => {
 // ── Uploaded files ────────────────────────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ── Serve React build in production ──────────────────────────────────────────
+// ── Serve frontend build from backend public folder ───────────────────────
+const publicPath = path.join(__dirname, 'public');
+const indexPath = path.join(publicPath, 'index.html');
+
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'public')));
-    // All non-API routes → React SPA
-    app.get('*', (req, res) => {
-        if (req.path.startsWith('/api')) {
-            return res.status(404).json({ message: 'API route not found' });
-        }
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    });
-} else {
-    app.use(notFound);
-    app.use(errorHandler);
+    if (fs.existsSync(publicPath) && fs.existsSync(indexPath)) {
+        app.use(express.static(publicPath));
+
+        app.get('*', (req, res) => {
+            if (req.path.startsWith('/api')) {
+                return res.status(404).json({ message: 'API route not found' });
+            }
+            res.sendFile(indexPath);
+        });
+    }
 }
+
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
