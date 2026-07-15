@@ -1,0 +1,44 @@
+﻿# =============================
+# Node Modules
+# =============================
+node_modules/
+**/node_modules/
+
+# =============================
+# Environment Variables
+# =============================
+.env
+**/.env
+
+# =============================
+# Build Outputs
+# =============================
+dist/
+build/
+
+# =============================
+# Logs
+# =============================
+npm-debug.log*
+yarn-error.log*
+logs/
+**/logs/
+
+# =============================
+# Uploads (user media - not tracked)
+# =============================
+uploads/
+**/uploads/
+
+# =============================
+# MongoDB Local Data (backend/db_data)
+# =============================
+backend/db_data/
+
+# =============================
+# OS/Editor Files
+# =============================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
