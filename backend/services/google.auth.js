@@ -1,7 +1,7 @@
 const path = require('path');
 const dotenv = require('dotenv');
 // Ensure env variables are loaded before configuring the Google Strategy
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;

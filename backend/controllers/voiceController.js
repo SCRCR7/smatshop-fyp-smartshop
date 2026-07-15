@@ -178,6 +178,11 @@ exports.handleAnalyzeText = asyncHandler(async (req, res) => {
             break;
         }
 
+        case 'UNKNOWN': {
+            responseData.ai_meta.meta = { ...ai.meta };
+            break;
+        }
+
         default:
             responseData.ai_meta.meta = { ...ai.meta };
     }

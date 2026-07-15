@@ -17,7 +17,7 @@ axios.interceptors.request.use((config) => {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId="663671391986-lal5ah5dqapacpt8hdh8rdh9k8ben37f.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="964057632542-1uj37s8pclehev7mhl892r2qdpqph0lq.apps.googleusercontent.com">
       <Provider store={store}>
         <App />
       </Provider>

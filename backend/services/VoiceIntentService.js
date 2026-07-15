@@ -91,6 +91,15 @@ const parseWithKeywords = (text) => {
         .replace(/\s{2,}/g, ' ')
         .trim();
 
+    // If nothing meaningful was extracted — empty keyword, no price, no sort — the user said something unrecognized
+    if (!product && !price_constraint && !sort) {
+        return {
+            intent: 'UNKNOWN',
+            slots: { product: '', adjectives: [], price_constraint: null, sort: null, quantity: 1 },
+            meta: { detected_lang: 'en', response_speech: "Sorry, I didn't understand that. Try saying something like 'show me shoes', 'go to cart', or 'laptops under 80,000'.", response_speech_ur: "Maafi, samajh nahi aaya. Kuch aur bolein jaise 'joote dikhao' ya 'cart mein jao'." }
+        };
+    }
+
     const speech = price_constraint
         ? `Searching for ${product || 'products'} ${price_constraint.operator === 'lt' ? 'under' : 'over'} Rs. ${price_constraint.value.toLocaleString()}.`
         : `Searching for ${product || 'products'}.`;
@@ -101,8 +110,8 @@ const parseWithKeywords = (text) => {
 class VoiceIntentService {
     async processUserCommand(text, lang = 'en') {
         const keyword = parseWithKeywords(text);
-        // Navigation & order — instant, no Gemini needed
-        if (['NAVIGATE', 'ORDER'].includes(keyword.intent)) return keyword;
+        // Navigation, order, and unknown — instant, no Gemini needed
+        if (['NAVIGATE', 'ORDER', 'UNKNOWN'].includes(keyword.intent)) return keyword;
 
         // Try Gemini for smarter multilingual understanding
         try {

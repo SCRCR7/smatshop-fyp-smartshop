@@ -9,9 +9,11 @@ const logger = require('./utils/logger');
 const googleAuthRoutes = require('./routes/googleAuth.routes');
 connectDB();
 
+const cors = require('cors');
 const app = express();
-app.use('/api/payment', require('./routes/payment.routes'));
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
 app.use(express.json());
+app.use('/api/payment', require('./routes/payment.routes'));
 
 
 app.use('/api/v1/voice', require('./routes/voiceRoutes'));

@@ -12,9 +12,9 @@ const ProductCard = ({ product }) => {
     const [imgLoaded, setImgLoaded] = useState(false);
     const [hovered, setHovered] = useState(false);
 
-    const discountPercent = product.discount || Math.floor(Math.random() * 25) + 10;
-    const originalPrice = Math.round(product.price * (1 + discountPercent / 100));
-    const rating = product.rating || (4 + Math.random()).toFixed(1);
+    const discountPercent = product.discount || 0;
+    const originalPrice = discountPercent > 0 ? Math.round(product.price * (1 + discountPercent / 100)) : null;
+    const rating = product.rating || 4.5;
 
     return (
         <div
@@ -47,15 +47,17 @@ const ProductCard = ({ product }) => {
                             transform: hovered ? 'scale(1.05)' : 'scale(1)',
                         }}
                     />
-                    {/* Discount badge */}
-                    <div style={{
-                        position: 'absolute', top: 10, left: 10,
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: 10, fontWeight: 800,
-                        padding: '4px 9px', borderRadius: 6, letterSpacing: '0.04em',
-                        boxShadow: '0 2px 6px rgba(16,185,129,0.25)'
-                    }}>
-                        -{discountPercent}%
-                    </div>
+                    {/* Discount badge — only shown when product has a real discount */}
+                    {discountPercent > 0 && (
+                        <div style={{
+                            position: 'absolute', top: 10, left: 10,
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: 10, fontWeight: 800,
+                            padding: '4px 9px', borderRadius: 6, letterSpacing: '0.04em',
+                            boxShadow: '0 2px 6px rgba(16,185,129,0.25)'
+                        }}>
+                            -{discountPercent}%
+                        </div>
+                    )}
                 </div>
 
                 {/* Info */}
@@ -68,12 +70,14 @@ const ProductCard = ({ product }) => {
                     </h3>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
                         <span style={{ fontSize: 17, fontWeight: 700, color: '#10b981', fontFamily: "'Space Grotesk', sans-serif" }}>Rs. {product.price?.toLocaleString()}</span>
-                        <span style={{ fontSize: 11, color: '#64748b', textDecoration: 'line-through' }}>Rs. {originalPrice.toLocaleString()}</span>
+                        {originalPrice && (
+                            <span style={{ fontSize: 11, color: '#64748b', textDecoration: 'line-through' }}>Rs. {originalPrice.toLocaleString()}</span>
+                        )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <Star size={11} fill="#f59e0b" color="#f59e0b" />
                         <span style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 600 }}>{Number(rating).toFixed(1)}</span>
-                        <span style={{ fontSize: 11, color: '#64748b', marginLeft: 2 }}>({product.numReviews || Math.floor(Math.random() * 200) + 10})</span>
+                        <span style={{ fontSize: 11, color: '#64748b', marginLeft: 2 }}>({product.numReviews || 0})</span>
                     </div>
                 </div>
             </Link>

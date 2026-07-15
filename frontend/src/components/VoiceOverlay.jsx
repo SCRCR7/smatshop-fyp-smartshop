@@ -50,6 +50,7 @@ const VoiceOverlay = () => {
     const isProcessing = status === 'processing';
     const isDone = status === 'succeeded';
     const isFailed = status === 'failed';
+    const isUnknown = isDone && voiceResult?.intent === 'UNKNOWN';
     const isUrdu = lang === 'ur';
     const cmds = COMMANDS[lang];
 
@@ -96,6 +97,14 @@ const VoiceOverlay = () => {
         if (voiceResult.intent === 'SEARCH') {
             dispatch(resetAssistant());
             setTimeout(() => navigate('/search/voice-results'), 50);
+            return;
+        }
+        if (voiceResult.intent === 'UNKNOWN') {
+            // Message is already shown in assistantMessage; auto-reset after 3s so user can try again
+            setTimeout(() => {
+                dispatch(resetAssistant());
+                setTimeout(() => dispatch(setStatus('listening')), 100);
+            }, 3000);
         }
     }, [voiceResult, status]);
 
@@ -129,8 +138,12 @@ const VoiceOverlay = () => {
         rec.onresult = (e) => {
             let interim = '', finalText = '';
             for (let i = e.resultIndex; i < e.results.length; i++) {
-                if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
-                else interim += e.results[i][0].transcript;
+                if (e.results[i].isFinal) {
+                    // Reject low-confidence speech — threshold 0.45 filters random noise
+                    if ((e.results[i][0].confidence || 1) >= 0.45) {
+                        finalText += e.results[i][0].transcript;
+                    }
+                } else interim += e.results[i][0].transcript;
             }
             const current = transcriptRef.current + finalText;
             if (finalText) transcriptRef.current = current;
@@ -229,9 +242,10 @@ const VoiceOverlay = () => {
             </div>
 
             {/* Status */}
-            <p style={{ fontSize: 11, color: isListening ? '#6366f1' : isProcessing ? '#818cf8' : isDone ? '#10b981' : '#f43f5e', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 28 }}>
+            <p style={{ fontSize: 11, color: isListening ? '#6366f1' : isProcessing ? '#818cf8' : isUnknown ? '#f59e0b' : isDone ? '#10b981' : '#f43f5e', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 28 }}>
                 {isListening ? (isUrdu ? '● سن رہا ہوں' : '● Listening')
                     : isProcessing ? (isUrdu ? '◌ سمجھ رہا ہوں' : '◌ Processing')
+                    : isUnknown ? (isUrdu ? '⟳ دوبارہ کوشش کریں' : '⟳ Try Again')
                     : isDone ? (isUrdu ? '✓ سمجھ گیا!' : '✓ Got it!')
                     : (isUrdu ? '✗ غلطی ہوئی' : '✗ Error')}
             </p>
@@ -247,7 +261,7 @@ const VoiceOverlay = () => {
                 )}
                 <button onClick={() => isListening ? submit(transcriptRef.current) : handleRetry()} style={{
                     width: 100, height: 100, borderRadius: '50%', border: 'none', cursor: 'pointer',
-                    background: isListening ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : isProcessing ? '#141324' : isDone ? '#059669' : '#b91c1c',
+                    background: isListening ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : isProcessing ? '#141324' : isUnknown ? '#b45309' : isDone ? '#059669' : '#b91c1c',
                     color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: isListening ? '0 0 80px rgba(99, 102, 241, 0.4)' : 'none', transition: 'all 0.3s',
                 }}>
@@ -266,6 +280,7 @@ const VoiceOverlay = () => {
             <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 16, textAlign: 'center', direction: isUrdu ? 'rtl' : 'ltr', fontFamily: "'Space Grotesk', sans-serif" }}>
                 {isListening ? (isUrdu ? 'اپنا حکم بولیں' : 'Say your command')
                     : isProcessing ? (isUrdu ? 'سمجھ رہا ہوں...' : 'Understanding...')
+                    : isUnknown ? (isUrdu ? 'سمجھ نہیں آیا' : "Didn't understand")
                     : isDone ? (isUrdu ? 'سمجھ گیا!' : 'Got it!')
                     : (isUrdu ? 'کچھ غلط ہوا' : 'Something went wrong')}
             </h2>
